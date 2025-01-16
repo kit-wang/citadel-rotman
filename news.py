@@ -19,7 +19,40 @@ def get_recent_news():
 
 period = 0
 news = [{'personal_appl': 50, 'personal_orng': 60, '4_appl': 400, '4_orng': 480}]
+fairs = {'APPL': (404.8, 84.9), 'ORNG': (485, 45.3), 'FRUIT': (890, 96.2), "FPUT": (90, 96.2)}
 
+def find_fair(tick):
+  # no information
+  if tick < 179:
+    return fairs
+  # personal apple out
+  if tick >= 179:
+    fairs['APPL'][0] = fairs['APPL'][0] - 51 + news['personal_appl']
+    fairs['APPL'][1] = 78.6
+  # personal orange out
+  if tick >= 359:
+    fairs['ORNG'][0] = fairs['ORNG'][0] - 60 + news['personal_appl']
+    fairs['ORNG'][1] = 41.75
+  # 4 apple out
+  if tick >= 539:
+    fairs['APPL'][0] = fairs['APPL'][0] - 202.4 + news['4_appl']
+    fairs['APPL'][1] = 59.4
+    fairs['FRUIT'][0] = fairs['APPL'][0] + fairs['ORNG'][0]
+    fairs['FRUIT'][1] = 72.6
+  # 4 orange out
+  if tick >= 719:
+    fairs['ORNG'][0] = fairs['ORNG'][0] - 242.6 + news['4_orng']
+    fairs['ORNG'][1] = 31.56
+    fairs['FRUIT'][0] = fairs['APPL'][0] + fairs['ORNG'][0]
+    fairs['FRUIT'][1] = 67.26
+  
+  return fairs
+
+
+
+
+
+##################################################
 def arbitrage(session):
     tick = get_tick(s)
     if tick < 900:
