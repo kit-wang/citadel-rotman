@@ -60,8 +60,8 @@ def get_market_fair(session, ticker):
     raise ApiException('Authorization error. Please check API key.')
 
 
-
-news = [{'personal_appl': 50, 'personal_orng': 60, '4_appl': 400, '4_orng': 480}]
+# {'personal_appl': 50, 'personal_orng': 60, '4_appl': 400, '4_orng': 480}
+news = []
 fairs = {'APPL': (400, 81.65), 'ORNG': (480, 42.4264), 'FRUIT': (880, 92.0145), "FPUT": (80, 92.01)}
 
 def get_recent_news():
@@ -84,30 +84,43 @@ def find_fair(tick):
     return fairs
   # personal apple out
   if tick >= 179:
-    fairs['APPL'][0] = fairs['APPL'][0] - 50 + news['personal_appl']
+    fairs['APPL'][0] = fairs['APPL'][0] - 50 + news[0]
     fairs['APPL'][1] = 76.376
     fairs['FRUIT'][1] = 87.369
   # personal orange out
   if tick >= 359:
-    fairs['ORNG'][0] = fairs['ORNG'][0] - 60 + news['personal_appl']
+    fairs['ORNG'][0] = fairs['ORNG'][0] - 60 + news[1]
     fairs['ORNG'][1] = 39.686
     fairs['FRUIT'][1] = 86.072
   # 4 apple out
   if tick >= 539:
-    fairs['APPL'][0] = fairs['APPL'][0] - 200 + news['4_appl']
+    fairs['APPL'][0] = fairs['APPL'][0] - 200 + news[2]
     fairs['APPL'][1] = 57.735
     fairs['FRUIT'][0] = fairs['APPL'][0] + fairs['ORNG'][0]
     fairs['FRUIT'][1] = 70.0595
   # 4 orange out
   if tick >= 719:
-    fairs['ORNG'][0] = fairs['ORNG'][0] - 240 + news['4_orng']
+    fairs['ORNG'][0] = fairs['ORNG'][0] - 240 + news[3]
     fairs['ORNG'][1] = 30
     fairs['FRUIT'][0] = fairs['APPL'][0] + fairs['ORNG'][0]
     fairs['FRUIT'][1] = 65.064
 
   return fairs
 
-
+def update_news(tick):
+    if tick >= 179 and tick <= 180:
+        if len(news) == 0:
+            news.append(get_recent_news())
+    elif tick >= 359 and tick <= 360:
+        if len(news) == 1:
+            news.append(get_recent_news())
+    elif tick >= 539 and tick <= 540:
+        if len(news) == 2:
+            news.append(get_recent_news())
+    elif tick >= 719 and tick <= 720:
+        if len(news) == 3:
+            news.append(get_recent_news())
+    fairs = find_fair(tick)
 
 def arbitrage(session):
     tick = get_tick(s)
@@ -132,21 +145,36 @@ def arbitrage(session):
             
             session.post(f'http://localhost:{port}/v1/orders', params={'ticker': 'FRUIT', 'type': 'MARKET', 'quantity': 1, 'action': 'SELL'})
     
-    if tick >= 179 and tick <= 180:
-        news['personal_appl'] = get_recent_news()
-        find_fair(tick)
-    elif tick >= 359 and tick <= 360:
-        news['personal_orng'] = get_recent_news()
-        find_fair(tick)
-    elif tick >= 539 and tick <= 540:
-        news['4_appl'] = get_recent_news()
-        find_fair(tick)
-    elif tick >= 719 and tick <= 720:
-        news['4_orng'] = get_recent_news()
-        find_fair(tick)
-    
+        update_news()
+        
+def mm(session, ticker):
+    last = get_market_fair(session, ticker)
+    curr_bid, curr_ask = ticker_bid_ask(session, ticker)
+    our_fair = fairs[ticker[0]]
+    range = [fairs[ticker][0] - fairs[ticker][1], fairs[ticker][0] + fairs[ticker][1]]
+    if our_fair > curr_bid and our_fair > last + fairs[ticker][1]:
+        if curr_ask == last:
+            if our_fair > last + fairs[ticker][1]:
+                market_limit_order(ticker, 'BUY', 100, last + 0.01)
+    elif our_fair < curr_bid and our_fair < last - fairs[ticker][1]:
+        if curr_bid == last:
+            market_limit_order(ticker, 'SELL', 100, last - 0.01)
+    else:
+        send_order(ticker, 'BUY', 25, curr_bid + 0.01)
+        send_order(ticker, 'SELL', 25, curr_ask - 0.01)
+curtick = -1
+tick = 0
+fput = False
 while True:
-    arbitrage(s)
+    tick = get_tick(s)
+    if tick != curtick:
+        if tick % 2 == 0:
+            arbitrage(s)
+        for i in range(6):
+            mm(s, 'APPL')
+            mm(s, 'ORNG')
+            mm(s, 'FRUIT')
+        curtick = tick
 
 # ticker_bid_ask(s, 'APPL')
 # # print(get_tick(s))
