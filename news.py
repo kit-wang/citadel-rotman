@@ -27,28 +27,28 @@ def find_fair(tick):
     return fairs
   # personal apple out
   if tick >= 179:
-    fairs['APPL'][0] = fairs['APPL'][0] - 51 + news['personal_appl']
-    fairs['APPL'][1] = 78.6
+    fairs['APPL'][0] = fairs['APPL'][0] - 50 + news['personal_appl']
+    fairs['APPL'][1] = 76.376
+    fairs['FRUIT'][1] = 87.369
   # personal orange out
   if tick >= 359:
     fairs['ORNG'][0] = fairs['ORNG'][0] - 60 + news['personal_appl']
-    fairs['ORNG'][1] = 41.75
+    fairs['ORNG'][1] = 39.686
+    fairs['FRUIT'][1] = 86.072
   # 4 apple out
   if tick >= 539:
-    fairs['APPL'][0] = fairs['APPL'][0] - 202.4 + news['4_appl']
-    fairs['APPL'][1] = 59.4
+    fairs['APPL'][0] = fairs['APPL'][0] - 200 + news['4_appl']
+    fairs['APPL'][1] = 57.735
     fairs['FRUIT'][0] = fairs['APPL'][0] + fairs['ORNG'][0]
-    fairs['FRUIT'][1] = 72.6
+    fairs['FRUIT'][1] = 70.0595
   # 4 orange out
   if tick >= 719:
-    fairs['ORNG'][0] = fairs['ORNG'][0] - 242.6 + news['4_orng']
-    fairs['ORNG'][1] = 31.56
+    fairs['ORNG'][0] = fairs['ORNG'][0] - 240 + news['4_orng']
+    fairs['ORNG'][1] = 30
     fairs['FRUIT'][0] = fairs['APPL'][0] + fairs['ORNG'][0]
-    fairs['FRUIT'][1] = 67.26
-  
+    fairs['FRUIT'][1] = 65.064
+
   return fairs
-
-
 
 
 
