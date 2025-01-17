@@ -62,7 +62,7 @@ def get_market_fair(session, ticker):
 
 
 news = [{'personal_appl': 50, 'personal_orng': 60, '4_appl': 400, '4_orng': 480}]
-fairs = {'APPL': (404.8, 84.9), 'ORNG': (485, 45.3), 'FRUIT': (890, 96.2), "FPUT": (90, 96.2)}
+fairs = {'APPL': (400, 81.65), 'ORNG': (480, 42.4264), 'FRUIT': (880, 92.0145), "FPUT": (80, 92.01)}
 
 def get_recent_news():
     news = s.get(f'http://localhost:{port}/v1/news').json()
