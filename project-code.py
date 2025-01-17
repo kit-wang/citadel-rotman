@@ -21,13 +21,22 @@ def get_tick(session):
         return case['tick']
     raise ApiException('Authorization error. Please check API key.')
 
-def ticker_bid_ask(session, ticker):
+"""def ticker_bid_ask(session, ticker):
     payload = {'ticker': ticker}
     resp = session.get('http://localhost:10027/v1/securities/book', params = payload)
     if resp.ok:
         book = resp.json()
         return book['bids'][0]['price'], book['asks'][0]['price']
     raise ApiException('Authorization error. Please check API key.')
+"""
+def ticker_bid_ask(session, ticker):
+    payload = {'ticker': ticker}
+    resp = session.get('http://localhost:10027/v1/securities', params = payload)
+    if resp.ok:
+        book = resp.json()
+        print(book)
+        return book[0]['bid'], book[0]['ask']
+
 
 n = 1
 while n < 0:
@@ -47,7 +56,7 @@ def get_market_fair(session, ticker):
     resp = session.get('http://localhost:10044/v1/securities', params = payload)
     if resp.ok:
         case = resp.json()
-        return case['last']
+        return case[0]['last']
     raise ApiException('Authorization error. Please check API key.')
 
 
@@ -123,14 +132,18 @@ def arbitrage(session):
             
             session.post(f'http://localhost:{port}/v1/orders', params={'ticker': 'FRUIT', 'type': 'MARKET', 'quantity': 1, 'action': 'SELL'})
     
-    if tick >= 179 and tick <= 800:
+    if tick >= 179 and tick <= 180:
         news['personal_appl'] = get_recent_news()
+        find_fair(tick)
     elif tick >= 359 and tick <= 360:
         news['personal_orng'] = get_recent_news()
+        find_fair(tick)
     elif tick >= 539 and tick <= 540:
         news['4_appl'] = get_recent_news()
+        find_fair(tick)
     elif tick >= 719 and tick <= 720:
         news['4_orng'] = get_recent_news()
+        find_fair(tick)
     
 while True:
     arbitrage(s)
